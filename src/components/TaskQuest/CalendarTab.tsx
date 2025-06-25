@@ -8,7 +8,7 @@ import {
   Clock, 
   Plus,
   ExternalLink,
-  Sync,
+  RefreshCw,
   CheckCircle
 } from 'lucide-react';
 
@@ -112,7 +112,7 @@ export const CalendarTab = () => {
                   <div className="flex items-center space-x-2">
                     {event.synced && (
                       <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                        <Sync className="h-3 w-3 mr-1" />
+                        <RefreshCw className="h-3 w-3 mr-1" />
                         Synced
                       </Badge>
                     )}

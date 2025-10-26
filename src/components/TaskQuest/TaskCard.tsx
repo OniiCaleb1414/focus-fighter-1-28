@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { Calendar, Star } from 'lucide-react';
 
 interface Task {
-  id: number;
+  id: string | number;
   title: string;
   category: string;
   priority: 'low' | 'medium' | 'high';

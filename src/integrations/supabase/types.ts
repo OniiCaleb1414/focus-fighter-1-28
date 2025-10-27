@@ -52,7 +52,9 @@ export type Database = {
       character_stats: {
         Row: {
           created_at: string
+          creativity: number
           energy: number
+          focus: number
           health: number
           id: string
           level: number
@@ -62,7 +64,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          creativity?: number
           energy?: number
+          focus?: number
           health?: number
           id?: string
           level?: number
@@ -72,7 +76,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          creativity?: number
           energy?: number
+          focus?: number
           health?: number
           id?: string
           level?: number
@@ -89,6 +95,36 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      items: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          rarity: string
+          type: string
+          xp_cost: number
+        }
+        Insert: {
+          created_at?: string
+          icon: string
+          id?: string
+          name: string
+          rarity: string
+          type: string
+          xp_cost: number
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          rarity?: string
+          type?: string
+          xp_cost?: number
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -161,6 +197,38 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      user_items: {
+        Row: {
+          equipped: boolean
+          id: string
+          item_id: string
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          equipped?: boolean
+          id?: string
+          item_id: string
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          equipped?: boolean
+          id?: string
+          item_id?: string
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
           },
         ]
       }

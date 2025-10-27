@@ -408,16 +408,568 @@ npm run lint
 
 ---
 
-## 14. Troubleshooting (fixing common problems)
 
-- **Site won't start**: Run `npm install` then `npm run dev`. Check for typos.
-- **Page not found**: Make sure the file exists in `src/pages/` and the route is added in `App.tsx`.
-- **Image not showing**: Make sure the image is in `public/` and the path is correct.
-- **Database error**: Check your migration files and Supabase dashboard.
-- **Can't log in**: Check Supabase Auth settings and `.env` keys.
-- **Broken link**: Check the file or page exists and the path is correct.
-- **Forgot how to code**: Copy examples from this guide, or search for similar code in the project.
+## 14. Troubleshooting & How to Fix Errors
+
+### 1. Site won't start or shows a blank page
+- Open a terminal in your project folder.
+- Run:
+  ```sh
+  npm install
+  npm run dev
+  ```
+- Read any error messages in the terminal. If it says a file is missing, check the file path.
+- If you see a blank page, open the browser console (press F12) and look for red error messages.
+- Fix typos or missing imports as shown in the error.
+
+### 2. "Page not found" or 404 error
+- Make sure the file exists in `src/pages/`.
+- Check that the route is added in `App.tsx`.
+- Make sure the path in the browser matches the route (e.g., `/about`).
+
+### 3. Image or file not showing
+- Make sure the image or file is in the `public/` folder.
+- Check the file name and extension (e.g., `.png`, `.jpg`, `.pdf`).
+- Use the correct path in your code, like `/logo.png`.
+
+### 4. Database errors (Supabase)
+- Read the error message in the browser or terminal.
+- Check your migration files in `supabase/migrations/` for typos.
+- Open the Supabase dashboard and check if the table/column exists.
+- Make sure your `.env` keys are correct and match the Supabase project.
+
+### 5. Can't log in or auth errors
+- Check Supabase Auth settings in the dashboard.
+- Make sure the redirect URLs are correct (especially if you moved the site).
+- Check `.env` for correct Supabase keys.
+
+### 6. Broken link or button does nothing
+- Check the path in your code and make sure the file or page exists.
+- Make sure you are using the correct component or HTML tag (e.g., `<a href=...>` for links).
+
+### 7. "Module not found" or import error
+- Check the import path in your code. It should match the file location and name.
+- If you renamed or moved a file, update all imports that use it.
+
+### 8. "TypeError" or "undefined" error
+- Check if you are trying to use something that doesn't exist (like a missing variable or function).
+- Make sure you spelled everything correctly and imported what you need.
+
+### 9. "Permission denied" or can't update database
+- Check your Supabase table permissions in the dashboard (RLS policies).
+- Make sure your user is logged in and has the right role.
+
+### 10. Still stuck?
+- Copy the error message and search it on Google or StackOverflow.
+- Check the official docs (see section 12 for links).
+- Ask for help with the error message and what you tried.
 
 ---
 
-You can always undo changes with git if something goes wrong. Happy coding!
+You can always undo changes with git if something goes wrong. 
+
+## 15. Making Your App Better (Enhancement Guide)
+
+### A. Performance Improvements
+
+#### 1. Code Splitting
+```tsx
+// Instead of importing everything at once:
+import { BigComponent } from './BigComponent';
+
+// Use lazy loading:
+import { lazy } from 'react';
+const BigComponent = lazy(() => import('./BigComponent'));
+
+// Wrap with Suspense:
+import { Suspense } from 'react';
+<Suspense fallback={<div>Loading...</div>}>
+  <BigComponent />
+</Suspense>
+```
+
+#### 2. Image Optimization
+```tsx
+// Bad:
+<img src="/big-image.jpg" />
+
+// Better:
+<img 
+  src="/big-image.jpg"
+  width={800}
+  height={600}
+  loading="lazy"
+  alt="Description"
+/>
+```
+
+#### 3. Memoization for Heavy Components
+```tsx
+import { memo } from 'react';
+
+const HeavyComponent = memo(function HeavyComponent(props) {
+  return <div>Heavy content</div>;
+});
+```
+
+#### 4. State Management Optimization
+```tsx
+// Instead of updating all items:
+setItems([...items]);
+
+// Update specific item:
+setItems(prev => prev.map(item => 
+  item.id === targetId ? { ...item, updated: true } : item
+));
+```
+
+### B. User Experience Improvements
+
+#### 1. Loading States
+```tsx
+function LoadingButton({ isLoading, children }) {
+  return (
+    <Button disabled={isLoading}>
+      {isLoading ? (
+        <>
+          <Spinner className="mr-2" />
+          Loading...
+        </>
+      ) : children}
+    </Button>
+  );
+}
+```
+
+#### 2. Error Handling
+```tsx
+function ErrorBoundary({ children }) {
+  return (
+    <div role="alert">
+      <p>Something went wrong. Please try again.</p>
+      <Button onClick={() => window.location.reload()}>
+        Refresh Page
+      </Button>
+    </div>
+  );
+}
+```
+
+#### 3. Form Validation
+```tsx
+import { z } from "zod";
+
+const formSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+function validateForm(data) {
+  try {
+    formSchema.parse(data);
+    return { success: true };
+  } catch (error) {
+    return { success: false, errors: error.flatten() };
+  }
+}
+```
+
+#### 4. Responsive Design
+```tsx
+// In your components:
+<div className="
+  grid
+  grid-cols-1 
+  md:grid-cols-2 
+  lg:grid-cols-3 
+  gap-4
+  p-4
+  md:p-6
+  lg:p-8
+">
+  {/* Content */}
+</div>
+```
+
+### C. Security Enhancements
+
+#### 1. Input Sanitization
+```tsx
+function sanitizeInput(input: string) {
+  return input
+    .replace(/[<>]/g, '') // Remove HTML tags
+    .trim();              // Remove extra whitespace
+}
+
+// Use in forms:
+<input 
+  onChange={e => setValue(sanitizeInput(e.target.value))}
+/>
+```
+
+#### 2. Authentication Enhancement
+```tsx
+// Add remember me functionality
+function Login() {
+  const [rememberMe, setRememberMe] = useState(false);
+  
+  async function handleLogin(email, password) {
+    const { data, error } = await supabase.auth.signIn(
+      { email, password },
+      { rememberMe }
+    );
+  }
+}
+```
+
+#### 3. Role-Based Access
+```sql
+-- In Supabase migrations:
+CREATE TYPE user_role AS ENUM ('admin', 'user', 'guest');
+ALTER TABLE users ADD COLUMN role user_role DEFAULT 'user';
+
+-- Then in your component:
+function AdminPanel() {
+  const { user } = useAuth();
+  if (user?.role !== 'admin') return <AccessDenied />;
+  return <div>Admin content</div>;
+}
+```
+
+### D. Advanced Features
+
+#### 1. Real-time Updates
+```tsx
+function LiveChat() {
+  useEffect(() => {
+    const subscription = supabase
+      .from('messages')
+      .on('INSERT', payload => {
+        // Handle new message
+      })
+      .subscribe();
+
+    return () => subscription.unsubscribe();
+  }, []);
+}
+```
+
+#### 2. Offline Support
+```tsx
+// In your service worker:
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
+  );
+});
+
+// Enable in your app:
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+```
+
+#### 3. Analytics Integration
+```tsx
+function trackEvent(eventName, properties = {}) {
+  // Send to your analytics service
+  console.log(`Event: ${eventName}`, properties);
+}
+
+function Button({ onClick, children }) {
+  const handleClick = () => {
+    trackEvent('button_clicked', { buttonText: children });
+    onClick?.();
+  };
+
+  return <button onClick={handleClick}>{children}</button>;
+}
+```
+
+### E. Testing & Quality
+
+#### 1. Unit Testing
+```tsx
+// In __tests__/Button.test.tsx
+import { render, fireEvent } from '@testing-library/react';
+
+test('Button clicks work', () => {
+  const onClick = jest.fn();
+  const { getByText } = render(
+    <Button onClick={onClick}>Click Me</Button>
+  );
+  
+  fireEvent.click(getByText('Click Me'));
+  expect(onClick).toHaveBeenCalled();
+});
+```
+
+#### 2. E2E Testing
+```tsx
+// In cypress/e2e/login.cy.ts
+describe('Login Flow', () => {
+  it('should login successfully', () => {
+    cy.visit('/login');
+    cy.get('input[name="email"]').type('test@example.com');
+    cy.get('input[name="password"]').type('password123');
+    cy.get('button[type="submit"]').click();
+    cy.url().should('include', '/dashboard');
+  });
+});
+```
+
+### F. SEO & Accessibility
+
+#### 1. SEO Optimization
+```tsx
+function PageHead({ title, description }) {
+  return (
+    <head>
+      <title>{title} | Focus Fighter</title>
+      <meta name="description" content={description} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      {/* Add more meta tags as needed */}
+    </head>
+  );
+}
+```
+
+#### 2. Accessibility Improvements
+```tsx
+function AccessibleButton({ label, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      role="button"
+      tabIndex={0}
+      onKeyPress={e => {
+        if (e.key === 'Enter') onClick();
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+```
+
+### G. API & Database Optimization
+
+#### 1. Query Optimization
+```sql
+-- Add indexes for frequently searched columns
+CREATE INDEX idx_tasks_user_id ON tasks(user_id);
+CREATE INDEX idx_tasks_status ON tasks(status);
+
+-- Use efficient queries
+SELECT t.* 
+FROM tasks t 
+WHERE t.user_id = $1 
+  AND t.status = 'active'
+LIMIT 10;
+```
+
+#### 2. Caching
+```tsx
+const cache = new Map();
+
+async function getCachedData(key) {
+  if (cache.has(key)) {
+    return cache.get(key);
+  }
+  
+  const data = await fetchData(key);
+  cache.set(key, data);
+  return data;
+}
+```
+
+### H. Mobile Optimization
+
+#### 1. Touch Events
+```tsx
+function TouchableCard({ onPress, children }) {
+  return (
+    <div 
+      role="button"
+      tabIndex={0}
+      onClick={onPress}
+      onTouchStart={e => e.target.style.opacity = '0.7'}
+      onTouchEnd={e => e.target.style.opacity = '1'}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+#### 2. Responsive Images
+```tsx
+function ResponsiveImage({ src, alt }) {
+  return (
+    <picture>
+      <source 
+        media="(min-width: 1024px)" 
+        srcSet={`${src}-large.jpg`} 
+      />
+      <source 
+        media="(min-width: 640px)" 
+        srcSet={`${src}-medium.jpg`} 
+      />
+      <img 
+        src={`${src}-small.jpg`} 
+        alt={alt} 
+        loading="lazy" 
+      />
+    </picture>
+  );
+}
+```
+
+### I. Development Workflow Improvements
+
+#### 1. Git Hooks
+```json
+// In package.json
+{
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm test"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  }
+}
+```
+
+#### 2. VS Code Settings
+```json
+// In .vscode/settings.json
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
+```
+
+### J. Documentation
+
+#### 1. Component Documentation
+```tsx
+/**
+ * Button component that follows design system
+ * @param {string} variant - 'primary' | 'secondary' | 'ghost'
+ * @param {function} onClick - Click handler
+ * @param {ReactNode} children - Button content
+ */
+export function Button({ variant, onClick, children }) {
+  return (
+    <button 
+      className={`btn btn-${variant}`} 
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+#### 2. API Documentation
+```tsx
+/**
+ * Fetches user tasks
+ * @param {string} userId - User ID
+ * @param {object} options - Query options
+ * @param {string} options.status - Task status filter
+ * @param {number} options.limit - Max number of tasks
+ * @returns {Promise<Task[]>} Array of tasks
+ */
+async function getTasks(userId, options = {}) {
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', options.status)
+    .limit(options.limit);
+
+  if (error) throw error;
+  return data;
+}
+```
+
+### K. Feature Ideas
+
+1. Task Management
+   - Due dates with reminders
+   - Priority levels
+   - Categories/tags
+   - Recurring tasks
+
+2. Social Features
+   - Share progress
+   - Team challenges
+   - Friend system
+   - Activity feed
+
+3. Gamification
+   - Experience points
+   - Achievements
+   - Daily streaks
+   - Level system
+
+4. Analytics
+   - Progress tracking
+   - Habit statistics
+   - Goal completion rates
+   - Time tracking
+
+5. Integration Ideas
+   - Calendar sync
+   - Mobile app
+   - Browser extension
+   - Email notifications
+
+### L. Next Steps
+
+1. Start with Performance
+   - Implement code splitting
+   - Optimize images
+   - Add loading states
+
+2. Improve User Experience
+   - Add form validation
+   - Enhance error handling
+   - Implement responsive design
+
+3. Add Security
+   - Input sanitization
+   - Role-based access
+   - Enhanced authentication
+
+4. Implement Advanced Features
+   - Real-time updates
+   - Offline support
+   - Analytics
+
+5. Quality Assurance
+   - Add tests
+   - Improve accessibility
+   - Optimize SEO
+
+Remember to:
+- Test thoroughly before deploying
+- Document your changes
+- Keep security in mind
+- Consider user feedback
+- Monitor performance
+
+Happy improving! 🚀
